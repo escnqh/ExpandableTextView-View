@@ -194,7 +194,7 @@ public class ExpandableTextView extends TextView {
                     return mOrigText;
                 }
                 //获取达到限制行最后字符的偏移量
-                int indexEnd = getValidLayout().getLineEnd(mMaxLinesOnShrink - 1) - 4;
+                int indexEnd = getValidLayout().getLineEnd(mMaxLinesOnShrink - 1);
                 //获取达到限制行第一个字符的偏移量
                 int indexStart = getValidLayout().getLineStart(mMaxLinesOnShrink - 1);
                 //计算修改后（去掉剩下的部分，补上省略号）应该到达哪一个字符的偏移量
@@ -234,7 +234,8 @@ public class ExpandableTextView extends TextView {
                     }
                     indexEndTrimmedRevised += extraOffset;
                 }
-                CharSequence fixText = removeEndLineBreak(mOrigText.subSequence(0, indexEndTrimmedRevised));
+//                CharSequence fixText = removeEndLineBreak(mOrigText.subSequence(0, indexEndTrimmedRevised));
+                CharSequence fixText = removeEndLineBreak(mOrigText, indexEnd, indexEndTrimmedRevised);
                 SpannableStringBuilder ssbShrink = new SpannableStringBuilder(fixText).append(mEllipsisHint);
                 if (mShowToExpandHint) {
                     ssbShrink.append(getContentOfString(mGapToExpandHint) + getContentOfString(mToExpandHint));
@@ -259,6 +260,22 @@ public class ExpandableTextView extends TextView {
             }
         }
         return mOrigText;
+    }
+
+    private CharSequence removeEndLineBreak(CharSequence text, int indexEnd, int indexEndTrimmedRevised) {
+        String str = text.subSequence(0, indexEnd).toString();
+        if (str.endsWith("\n")) {
+            int l = str.length() - 1;
+            text = text.subSequence(0, l);
+            StringBuilder stringBuilder = new StringBuilder(text);
+            for (int i = 0; i < indexEndTrimmedRevised - l; i++) {
+                stringBuilder.append("  ");
+            }
+            text = stringBuilder;
+        } else {
+            text = text.subSequence(0, indexEndTrimmedRevised);
+        }
+        return text;
     }
 
     /**
